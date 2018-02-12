@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "Sphere.h"
 #include "Box.h"
+#include "Plane.h"
 #include <Gizmos.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -26,15 +27,13 @@ bool PhysicsEngineApp::startup() {
 
 	m_2dRenderer = new aie::Renderer2D();
 
-	
-
 	// TODO: remember to change this when redistributing a build!
 	// the following path would be used instead: "./font/consolas.ttf"
 	m_font = new aie::Font("../bin/font/consolas.ttf", 32);
 
 	m_physicsScene = new PhysicsScene();
-	m_physicsScene->setGravity(glm::vec2(0, -10));
-	m_physicsScene->setTimeStep(0.5f);
+	m_physicsScene->setGravity(glm::vec2(0, 0));
+	m_physicsScene->setTimeStep(0.01f);
 
 	float radius = 1.0f;
 	float speed = 30;
@@ -42,15 +41,30 @@ bool PhysicsEngineApp::startup() {
 	float inclination = (float)M_PI / 4.0f;
 	float inclinationInRadians = 0.78539816339;
 
-	m_physicsScene->addActor(new Sphere(startPos, glm::vec2( (cos(inclinationInRadians) , sin(inclinationInRadians)) * speed ), 1, radius, glm::vec4(1, 0, 0, 1)));
+	Sphere* m_sphere1;
+	Sphere* m_sphere2;
+	Sphere* m_sphere3;
+	Plane* m_plane1;
+	Box* m_box1;
+	Box* m_box2;
+	m_sphere1 = new Sphere({ -60, -20 }, { 0,0 }, 10, 20, { 1,0,0,1 });
+	m_sphere2 = new Sphere({ 0, 10 }, { 0,-9 }, 10, 3, { 1,1,0,1 });
+	m_sphere3 = new Sphere({ -60, 15 }, { 0,-9 }, 10, 3, { 1,1,0,1 });
+	m_plane1 = new Plane({ 1,1 }, 0, {1,0.5,0,1});
+	m_box1 = new Box({ 20, 20 }, { 0,-9 }, 1, { 5,5 }, { 0,1,0,1 });
+	m_box2 = new Box({ 20, 0 }, { 0,0 }, 1, { 5,5 }, { 1,1,0,1 });
 
-	//m_sphere1 = new Sphere(glm::vec2{ 0, 0 }, glm::vec2{ 0,0 }, 10, 5, glm::vec4{ 1,0,0,1 });
-	//m_box1 = new Box(glm::vec2{ 20, 0 }, glm::vec2{ 0,0 }, 10, glm::vec2{ 5,5 }, glm::vec4{ 0,1,0,1 });
-	//
-	//m_physicsScene->addActor(m_sphere1);
-	//m_physicsScene->addActor(m_box1); 
+	
+	m_physicsScene->addActor(m_sphere1);
+	m_physicsScene->addActor(m_sphere2);
+	m_physicsScene->addActor(m_sphere3);
+	m_physicsScene->addActor(m_plane1);
+	m_physicsScene->addActor(m_box1); 
+	m_physicsScene->addActor(m_box2);
 
-	setupContinousDemo(glm::vec2(-40, 0), 45.0f, 20.0f, -10.0f);
+
+	//m_physicsScene->addActor(new Sphere(startPos, glm::vec2( (cos(inclinationInRadians) , sin(inclinationInRadians)) * speed ), 1, radius, glm::vec4(1, 0, 0, 1)));
+	//setupContinousDemo(glm::vec2(-40, 0), 45.0f, 20.0f, -10.0f);
 
 	return true;
 }
@@ -64,7 +78,7 @@ void PhysicsEngineApp::shutdown() {
 
 void PhysicsEngineApp::update(float deltaTime) {
 
-	//aie::Gizmos::clear();
+	aie::Gizmos::clear();
 
 	// input example
 	aie::Input* input = aie::Input::getInstance();

@@ -1,10 +1,12 @@
 #pragma once
 #include <glm/glm.hpp>
 
-enum ShapeType {
+enum ShapeType 
+{
 	PLANE = 0,
 	SPHERE,
-	BOX
+	BOX,
+	SHAPE_COUNT
 };
 
 class PhysicsObject

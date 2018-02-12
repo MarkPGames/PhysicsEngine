@@ -3,7 +3,10 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+
 class PhysicsObject;
+class Sphere;
+class Plane;
 
 class PhysicsScene
 {
@@ -24,15 +27,17 @@ public:
 	void checkForCollisions();
 
 	static bool plane2Plane(PhysicsObject* object1, PhysicsObject* object2);
-	static bool plane2Sphere(PhysicsObject* object1, PhysicsObject* object2);
 	static bool plane2Box(PhysicsObject* object1, PhysicsObject* object2);
+
 	static bool sphere2Plane(PhysicsObject* object1, PhysicsObject* object2);
 	static bool sphere2Sphere(PhysicsObject* object1, PhysicsObject* object2);
 	static bool sphere2Box(PhysicsObject* object1, PhysicsObject* object2);
-	static bool box2Plane(PhysicsObject* object1, PhysicsObject* object2);
-	static bool box2Sphere(PhysicsObject* object1, PhysicsObject* object2);
+
 	static bool box2Box(PhysicsObject* object1, PhysicsObject* object2);
 
+	//static bool box2Plane(PhysicsObject* object1, PhysicsObject* object2);
+	//static bool box2Sphere(PhysicsObject* object1, PhysicsObject* object2);
+	//static bool plane2Sphere(PhysicsObject* object1, PhysicsObject* object2);
 
 
 protected:

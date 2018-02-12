@@ -38,4 +38,9 @@ void Rigidbody::applyForceToActor(Rigidbody * actor2, glm::vec2 force)
 	applyForce(-force);
 }
 
+void Rigidbody::setVelocity(glm::vec2 a_vel)
+{
+	m_velocity = a_vel;
+}
+
 

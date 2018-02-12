@@ -5,6 +5,7 @@
 
 class Sphere;
 class Box;
+class Plane;
 
 class PhysicsEngineApp : public aie::Application {
 public:
@@ -25,7 +26,5 @@ protected:
 	aie::Renderer2D*	m_2dRenderer;
 	aie::Font*			m_font;
 	PhysicsScene* m_physicsScene;
-	Sphere* m_sphere1;
-	Box* m_box1;
 
 };
