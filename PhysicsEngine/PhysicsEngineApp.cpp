@@ -44,20 +44,24 @@ bool PhysicsEngineApp::startup() {
 	Sphere* m_sphere1;
 	Sphere* m_sphere2;
 	Sphere* m_sphere3;
+	Sphere* m_sphere4;
 	Plane* m_plane1;
 	Box* m_box1;
 	Box* m_box2;
-	m_sphere1 = new Sphere({ -60, -20 }, { 0,0 }, 10, 20, { 1,0,0,1 });
-	m_sphere2 = new Sphere({ 0, 10 }, { 0,-9 }, 10, 3, { 1,1,0,1 });
-	m_sphere3 = new Sphere({ -60, 15 }, { 0,-9 }, 10, 3, { 1,1,0,1 });
-	m_plane1 = new Plane({ 1,1 }, 0, {1,0.5,0,1});
-	m_box1 = new Box({ 20, 20 }, { 0,-9 }, 1, { 5,5 }, { 0,1,0,1 });
+	m_sphere1 = new Sphere({ -60, 10 }, { 0,9.8 }, 10, 10, { 1,0,0,1 });
+	m_sphere2 = new Sphere({ 0, 10 }, { 0,-9.8 }, 10, 3, { 1,1,0,1 });
+	m_sphere3 = new Sphere({ -60, 30 }, { 0,-9.8 }, 10, 3, { 1,1,0,1 });
+	m_sphere4 = new Sphere({ 0, -5 }, { -20,0 }, 10, 3, { 1,1,0,1 });
+	m_plane1 = new Plane({ 0,1 }, 0, {1,0.5,0,1});
+	m_box1 = new Box({ 20, 20 }, { 0,0 }, 1, { 5,5 }, { 0,1,0,1 });
 	m_box2 = new Box({ 20, 0 }, { 0,0 }, 1, { 5,5 }, { 1,1,0,1 });
+	m_box2 = new Box({ -30, -10 }, { 0,0 }, 1, { 6,6 }, { 1,1,1,1 });
 
 	
 	m_physicsScene->addActor(m_sphere1);
 	m_physicsScene->addActor(m_sphere2);
 	m_physicsScene->addActor(m_sphere3);
+	m_physicsScene->addActor(m_sphere4);
 	m_physicsScene->addActor(m_plane1);
 	m_physicsScene->addActor(m_box1); 
 	m_physicsScene->addActor(m_box2);

@@ -6,6 +6,7 @@
 #include "Plane.h"
 #include "Box.h"
 #include <iostream>
+#include <cmath>
 
 PhysicsScene::PhysicsScene() : m_timeStep(0.01f), m_gravity(glm::vec2(0, 0))
 {
@@ -92,8 +93,50 @@ bool PhysicsScene::plane2Plane(PhysicsObject* object1, PhysicsObject* object2)
 
 bool PhysicsScene::plane2Box(PhysicsObject * object1, PhysicsObject * object2)
 {
+	Plane *plane = dynamic_cast<Plane*>(object1);
+	Box *box = dynamic_cast<Box*>(object2);
+
+	glm::vec2 collisionNormal = plane->getNormal();
+
+	glm::vec2 boxToPlaneBtmLeft = box->min();
+	glm::vec2 boxToPlaneTopLeft = { box->min().x, box->max().y };
+	glm::vec2 boxToPlaneTopRight = box->max();
+	glm::vec2 boxToPlaneBtmRight = { box->min().x, box->max().y };
+
+	//float intersectionMin = glm::distance(box->getPosition(), box->min()) * 0.5 - boxToPlaneBtmLeft;
+	//float intersectionMax = glm::distance(box->getPosition(), box->max()) * 0.5 - boxToPlaneTopRight;
+
+	std::vector<float> closestPosArry;
+
+	closestPosArry.push_back( glm::dot(boxToPlaneTopLeft, (plane->getNormal() - plane->getDistance())));
+	closestPosArry.push_back(glm::dot(boxToPlaneTopRight, (plane->getNormal() - plane->getDistance())));
+	closestPosArry.push_back(glm::dot(boxToPlaneBtmLeft, (plane->getNormal() - plane->getDistance())));
+	closestPosArry.push_back(glm::dot(boxToPlaneBtmRight, (plane->getNormal() - plane->getDistance())));
+
+	float closestPoint = closestPosArry[0];
+	int vertIndex = 0;
+
+	for (int i = 1; i < 3; i++)
+	{
+		if (closestPosArry[i] < closestPoint)
+		{
+			closestPoint = closestPosArry[i];
+			vertIndex = i;
+		}
+	}
+
+
+
+	if (closestPosArry[vertIndex] < 0) {
+		//set sphere velocity to zero here
+		box->setVelocity({ 0,0 });
+		return true;
+	}
+
 	return false;
 }
+
+
 
 bool PhysicsScene::sphere2Plane(PhysicsObject * object1, PhysicsObject * object2)
 {
@@ -143,9 +186,8 @@ bool PhysicsScene::sphere2Sphere(PhysicsObject * object1, PhysicsObject * object
 		if (distBetween < (sphere1->getRadius() + sphere2->getRadius()))
 		{
 			// velocity of both spheres to 0 (we’ll add collision resolution later)
-			sphere1->setVelocity({ 0, 0 });
-			sphere2->setVelocity({ 0, 0 });
-			std::cout<< "SPHERES COLLIDING";
+			sphere1->resolveCollision(sphere2);
+			return true;
 		}
 		
 	}
@@ -154,6 +196,21 @@ bool PhysicsScene::sphere2Sphere(PhysicsObject * object1, PhysicsObject * object
 
 bool PhysicsScene::sphere2Box(PhysicsObject * object1, PhysicsObject * object2)
 {
+	Sphere *sphere = dynamic_cast<Sphere*>(object1);
+	Box *box = dynamic_cast<Box*>(object2);
+
+	if (box != nullptr && sphere != nullptr)
+	{
+		if (box->min().x < sphere->getPosition().x + sphere->getRadius()
+			&& box->max().x > sphere->getPosition().x - sphere->getRadius()
+			&& box->min().y < sphere->getPosition().y + sphere->getRadius()
+			&& box->max().y > sphere->getPosition().y - sphere->getRadius())
+		{
+			box->setVelocity({ 0,0 });
+			sphere->setVelocity({ 0,0 });
+			return true;
+		}
+	}
 	return false;
 }
 
