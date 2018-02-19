@@ -41,31 +41,38 @@ bool PhysicsEngineApp::startup() {
 	float inclination = (float)M_PI / 4.0f;
 	float inclinationInRadians = 0.78539816339;
 
-	Sphere* m_sphere1;
-	Sphere* m_sphere2;
-	Sphere* m_sphere3;
-	Sphere* m_sphere4;
+	//Sphere* m_sphere1;
+	//Sphere* m_sphere2;
+	//Sphere* m_sphere3;
+	//Sphere* m_sphere4;
+	Sphere* m_cueBall;
+	Sphere* m_ball;
 	Plane* m_plane1;
 	Box* m_box1;
-	Box* m_box2;
-	m_sphere1 = new Sphere({ -60, 10 }, { 0,9.8 }, 10, 10, { 1,0,0,1 });
-	m_sphere2 = new Sphere({ 0, 10 }, { 0,-9.8 }, 10, 3, { 1,1,0,1 });
-	m_sphere3 = new Sphere({ -60, 30 }, { 0,-9.8 }, 10, 3, { 1,1,0,1 });
-	m_sphere4 = new Sphere({ 0, -5 }, { -20,0 }, 10, 3, { 1,1,0,1 });
-	m_plane1 = new Plane({ 0,1 }, 0, {1,0.5,0,1});
-	m_box1 = new Box({ 20, 20 }, { 0,0 }, 1, { 5,5 }, { 0,1,0,1 });
-	m_box2 = new Box({ 20, 0 }, { 0,0 }, 1, { 5,5 }, { 1,1,0,1 });
-	m_box2 = new Box({ -30, -10 }, { 0,0 }, 1, { 6,6 }, { 1,1,1,1 });
-
+	//Box* m_box2;
+	//m_sphere1 = new Sphere({ -60, 10 }, { 0,9.8 }, 10, 10, { 1,0,0,1 });
+	//m_sphere2 = new Sphere({ 0, 10 }, { 0,-9.8 }, 10, 3, { 1,1,0,1 });
+	//m_sphere3 = new Sphere({ -60, 30 }, { 0,-9.8 }, 10, 3, { 1,1,0,1 });
+	//m_sphere4 = new Sphere({ 0, -5 }, { -20,0 }, 10, 3, { 1,1,0,1 });
+	m_plane1 = new Plane({ 1,0 }, -10, {1,0.5,0,1});
+	m_box1 = new Box({ 0, 0 }, { 0,0 }, 160, { 5,5 }, { 0,1,0,1 });
+	//m_box2 = new Box({ 20, 0 }, { 0,0 }, 1, { 5,5 }, { 1,1,0,1 });
+	//m_box2 = new Box({ -30, -10 }, { 0,0 }, 1, { 6,6 }, { 1,1,1,1 });
+	m_cueBall = new Sphere({ -30, 0 }, { 11.11f, 0 }, 170, 3, { 1,1,1,1 });
+	m_ball = new Sphere({ 0, 20 }, { -11.11f, 0.0f }, 160, 3, { 1,0,0,1 });
+	//
+	//
+	//m_physicsScene->addActor(m_sphere1);
+	//m_physicsScene->addActor(m_sphere2);
+	//m_physicsScene->addActor(m_sphere3);
+	//m_physicsScene->addActor(m_sphere4);
 	
-	m_physicsScene->addActor(m_sphere1);
-	m_physicsScene->addActor(m_sphere2);
-	m_physicsScene->addActor(m_sphere3);
-	m_physicsScene->addActor(m_sphere4);
-	m_physicsScene->addActor(m_plane1);
-	m_physicsScene->addActor(m_box1); 
-	m_physicsScene->addActor(m_box2);
+	//m_physicsScene->addActor(m_box1); 
+	//m_physicsScene->addActor(m_box2);
 
+	m_physicsScene->addActor(m_ball);
+	m_physicsScene->addActor(m_cueBall);
+	m_physicsScene->addActor(m_plane1);
 
 	//m_physicsScene->addActor(new Sphere(startPos, glm::vec2( (cos(inclinationInRadians) , sin(inclinationInRadians)) * speed ), 1, radius, glm::vec4(1, 0, 0, 1)));
 	//setupContinousDemo(glm::vec2(-40, 0), 45.0f, 20.0f, -10.0f);

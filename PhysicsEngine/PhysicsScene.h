@@ -9,9 +9,20 @@ class PhysicsObject;
 class Sphere;
 class Plane;
 
+struct CollisionData
+{
+	CollisionData() { overlap = 0, normal = { 0, 0 }, collision = false; };
+	CollisionData(float a_overlap, glm::vec2 a_normal, bool a_collision) { overlap = a_overlap; normal = a_normal; collision = a_collision;};
+	CollisionData(bool a_collision) { collision = a_collision; };
+
+	bool collision;
+	float overlap;
+	glm::vec2 normal;
+
+};
+
 class PhysicsScene
 {
-
 public:
 	PhysicsScene();
 	~PhysicsScene();
@@ -27,15 +38,16 @@ public:
 	float getTimeStep() const { return m_timeStep; }
 
 	void checkForCollisions();
+	void resolveCollision(PhysicsObject * object1, PhysicsObject* object2 = nullptr);
 
-	static bool plane2Plane(PhysicsObject* object1, PhysicsObject* object2);
-	static bool plane2Box(PhysicsObject* object1, PhysicsObject* object2);
+	static CollisionData plane2Plane(PhysicsObject* object1, PhysicsObject* object2);
+	static CollisionData plane2Box(PhysicsObject* object1, PhysicsObject* object2);
 
-	static bool sphere2Plane(PhysicsObject* object1, PhysicsObject* object2);
-	static bool sphere2Sphere(PhysicsObject* object1, PhysicsObject* object2);
-	static bool sphere2Box(PhysicsObject* object1, PhysicsObject* object2);
+	static CollisionData sphere2Plane(PhysicsObject* object1, PhysicsObject* object2);
+	static CollisionData sphere2Sphere(PhysicsObject* object1, PhysicsObject* object2);
+	static CollisionData sphere2Box(PhysicsObject* object1, PhysicsObject* object2);
 
-	static bool box2Box(PhysicsObject* object1, PhysicsObject* object2);
+	static CollisionData box2Box(PhysicsObject* object1, PhysicsObject* object2);
 
 	//static bool box2Plane(PhysicsObject* object1, PhysicsObject* object2);
 	//static bool box2Sphere(PhysicsObject* object1, PhysicsObject* object2);
@@ -46,5 +58,6 @@ protected:
 	glm::vec2 m_gravity;
 	float m_timeStep;
 	std::vector<PhysicsObject*> m_actors;
+	CollisionData collisionData;
 };
 

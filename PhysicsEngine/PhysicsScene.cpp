@@ -5,12 +5,14 @@
 #include "Sphere.h"
 #include "Plane.h"
 #include "Box.h"
+#include "Rigidbody.h"
 #include <iostream>
 #include <cmath>
 
 PhysicsScene::PhysicsScene() : m_timeStep(0.01f), m_gravity(glm::vec2(0, 0))
 {
 	m_gravity = glm::vec2(0, -9.8f);
+	collisionData = CollisionData();
 }
 
 
@@ -48,7 +50,7 @@ void PhysicsScene::updateGizmos()
 }
 
 // function pointer array for doing our collisions
-typedef bool(*fn)(PhysicsObject*, PhysicsObject*);
+typedef CollisionData(*fn)(PhysicsObject*, PhysicsObject*);
 
 static fn collisionFunctionArray[] =
 {
@@ -78,7 +80,11 @@ void PhysicsScene::checkForCollisions()
 			if (collisionFunctionPtr != nullptr)
 			{
 				// did a collision occur?
-				collisionFunctionPtr(object1, object2);
+				collisionData = collisionFunctionPtr(object1, object2);
+				if (collisionData.collision == true)
+				{
+					resolveCollision(object1, object2);
+				}
 			}
 
 
@@ -86,15 +92,15 @@ void PhysicsScene::checkForCollisions()
 	}
 }
 
-bool PhysicsScene::plane2Plane(PhysicsObject* object1, PhysicsObject* object2)
+CollisionData PhysicsScene::plane2Plane(PhysicsObject* object1, PhysicsObject* object2)
 {
 	return false;
 }
 
-bool PhysicsScene::plane2Box(PhysicsObject * object1, PhysicsObject * object2)
+CollisionData PhysicsScene::plane2Box(PhysicsObject * object1, PhysicsObject * object2)
 {
-	Plane *plane = dynamic_cast<Plane*>(object1);
-	Box *box = dynamic_cast<Box*>(object2);
+	Plane *plane = dynamic_cast<Plane*>(object2);
+	Box *box = dynamic_cast<Box*>(object1);
 
 	glm::vec2 collisionNormal = plane->getNormal();
 
@@ -128,9 +134,7 @@ bool PhysicsScene::plane2Box(PhysicsObject * object1, PhysicsObject * object2)
 
 
 	if (closestPosArry[vertIndex] < 0) {
-		//set sphere velocity to zero here
-		box->setVelocity({ 0,0 });
-		return true;
+		return CollisionData(true);
 	}
 
 	return false;
@@ -138,7 +142,7 @@ bool PhysicsScene::plane2Box(PhysicsObject * object1, PhysicsObject * object2)
 
 
 
-bool PhysicsScene::sphere2Plane(PhysicsObject * object1, PhysicsObject * object2)
+CollisionData PhysicsScene::sphere2Plane(PhysicsObject * object1, PhysicsObject * object2)
 {
 	Sphere *sphere = dynamic_cast<Sphere*>(object1);
 	Plane *plane = dynamic_cast<Plane*>(object2);
@@ -156,20 +160,20 @@ bool PhysicsScene::sphere2Plane(PhysicsObject * object1, PhysicsObject * object2
 		}
 
 		float intersection = sphere->getRadius() - sphereToPlane;
-		if (intersection > 0) {
-			//set sphere velocity to zero here
-			sphere->setVelocity({ 0,0 });
-			return true;
+		if (intersection > 0) 
+		{
+			return CollisionData(intersection, collisionNormal, true);
 		}
 	}
-	return false;
+	return CollisionData(false);
 }
 
-bool PhysicsScene::sphere2Sphere(PhysicsObject * object1, PhysicsObject * object2)
+CollisionData PhysicsScene::sphere2Sphere(PhysicsObject * object1, PhysicsObject * object2)
 {
 	//try to cast objects to sphere and sphere
 	Sphere* sphere1 = dynamic_cast<Sphere*>(object1);
 	Sphere *sphere2 = dynamic_cast<Sphere*>(object2);
+
 	assert((sphere1 != nullptr && sphere2 != nullptr));
 	//if we are successful then test for collision
 	if (sphere1 != nullptr && sphere2 != nullptr) {
@@ -181,20 +185,21 @@ bool PhysicsScene::sphere2Sphere(PhysicsObject * object1, PhysicsObject * object
 		float distBetween = 0;
 		distBetween = glm::distance(sphere2->getPosition(), sphere1->getPosition());
 
+		//calculate the normal
+		glm::vec2 normal = glm::normalize(sphere2->getPosition() - sphere1->getPosition());
+
 		// if distance is less than the combined radius of 
 		// both spheres, then a collision occurred so set the
 		if (distBetween < (sphere1->getRadius() + sphere2->getRadius()))
 		{
-			// velocity of both spheres to 0 (we’ll add collision resolution later)
-			sphere1->resolveCollision(sphere2);
-			return true;
+			return CollisionData(distBetween, normal, true);
 		}
-		
+	
 	}
 	return false;
 }
 
-bool PhysicsScene::sphere2Box(PhysicsObject * object1, PhysicsObject * object2)
+CollisionData PhysicsScene::sphere2Box(PhysicsObject * object1, PhysicsObject * object2)
 {
 	Sphere *sphere = dynamic_cast<Sphere*>(object1);
 	Box *box = dynamic_cast<Box*>(object2);
@@ -206,9 +211,7 @@ bool PhysicsScene::sphere2Box(PhysicsObject * object1, PhysicsObject * object2)
 			&& box->min().y < sphere->getPosition().y + sphere->getRadius()
 			&& box->max().y > sphere->getPosition().y - sphere->getRadius())
 		{
-			box->setVelocity({ 0,0 });
-			sphere->setVelocity({ 0,0 });
-			return true;
+			return CollisionData(true);
 		}
 	}
 	return false;
@@ -225,7 +228,7 @@ bool PhysicsScene::sphere2Box(PhysicsObject * object1, PhysicsObject * object2)
 //	return false;
 //}
 
-bool PhysicsScene::box2Box(PhysicsObject * object1, PhysicsObject * object2)
+CollisionData PhysicsScene::box2Box(PhysicsObject * object1, PhysicsObject * object2)
 {
 	Box *box1 = dynamic_cast<Box*>(object1);
 	Box *box2 = dynamic_cast<Box*>(object2);
@@ -237,13 +240,72 @@ bool PhysicsScene::box2Box(PhysicsObject * object1, PhysicsObject * object2)
 			&& box1->min().y < box2->max().y
 			&& box1->max().y > box2->min().y)
 		{
-			box1->setVelocity({ 0,0 });
-			box2->setVelocity({ 0,0 });
-
-			std::cout << "BOXES COLLIDING";
+			return CollisionData(true);
 		}
 	}
 	return false;
+}
+
+void PhysicsScene::resolveCollision(PhysicsObject * object1, PhysicsObject* object2)
+{
+	Rigidbody* rb1;
+	Rigidbody* rb2;
+
+	glm::vec2 normal;
+	glm::vec2 relativeVelocity;
+	float elasticity = 1;
+	float j;
+
+	if (dynamic_cast<Rigidbody*>(object1) == nullptr)
+	{
+		rb2 = (Rigidbody*)object2;
+		normal = collisionData.normal;
+		glm::vec2 relativeVelocity = rb2->getVelocity();
+
+		elasticity = 1.0f;
+
+		float invMass = 1.0f / rb2->getMass();
+		float top = (-(1 + elasticity) * glm::dot((relativeVelocity), normal));
+		j = top / invMass;
+
+		glm::vec2 force = normal * j;
+
+		rb2->applyForce(force, Rigidbody::ForceMode::IMPULSE);
+	}
+	else if (dynamic_cast<Rigidbody*>(object2) == nullptr)
+	{
+		rb1 = (Rigidbody*)object1;
+
+		normal = collisionData.normal;
+		glm::vec2 relativeVelocity = rb1->getVelocity();
+
+		elasticity = 1.0f;
+
+		float invMass = 1.0f / rb1->getMass();
+		float top = (-(1 + elasticity) * glm::dot((relativeVelocity), normal));
+		j = top / invMass;
+
+		glm::vec2 force = normal * j;
+
+		rb1->applyForce(force, Rigidbody::ForceMode::IMPULSE);
+	}
+	else
+	{
+		rb1 = (Rigidbody*)object1;
+		rb2 = (Rigidbody*)object2;
+
+		normal = glm::normalize(rb2->getPosition() - rb1->getPosition());
+		relativeVelocity = rb2->getVelocity() - rb1->getVelocity();
+
+		elasticity = 1;
+		float j = glm::dot(-(1 + elasticity) * (relativeVelocity), normal)
+			/ glm::dot(normal, normal * ((1 / rb1->getMass()) + (1 / rb2->getMass())));
+
+		glm::vec2 force = normal * j;
+
+		rb1->applyForce(force, Rigidbody::ForceMode::IMPULSE);
+		rb2->applyForce(force, Rigidbody::ForceMode::IMPULSE);
+	}
 }
 
 void PhysicsScene::addActor(PhysicsObject* actor)
@@ -257,4 +319,3 @@ void PhysicsScene::removeActor(PhysicsObject* actor)
 {
 	std::remove(std::begin(m_actors), std::end(m_actors), actor);
 }
-

@@ -17,7 +17,7 @@ Rigidbody::~Rigidbody()
 
 void Rigidbody::fixedUpdate(glm::vec2 gravity, float timeStep)
 {
-	applyForce(gravity * m_mass);
+	applyForce(gravity * m_mass, ForceMode::FORCE);
 	m_velocity += m_acceleration * timeStep;
 	m_position += m_velocity * timeStep;
 	m_acceleration = { 0,0 };
@@ -32,16 +32,16 @@ void Rigidbody::applyForce(glm::vec2 force, ForceMode forceMode)
 	//Apply the force differently depending on the type of force
 	switch (forceMode)
 	{
-	case Rigidbody::Force:
+	case ForceMode::FORCE:
 		m_acceleration += force / m_mass;
 		break;
-	case Rigidbody::Acceleration:
+	case ForceMode::ACCELERATION:
 		m_acceleration += force;
 		break;
-	case Rigidbody::Impulse:
-		m_velocity += force / mass;
+	case ForceMode::IMPULSE:
+		m_velocity += force / m_mass;
 		break;
-	case Rigidbody::VelocityChange:
+	case ForceMode::VELOCITYCHANGE:
 		m_velocity += force;
 		break;
 	default:
@@ -56,20 +56,6 @@ void Rigidbody::applyForceToActor(Rigidbody * actor2, glm::vec2 force, ForceMode
 {
 	actor2->applyForce(force, forceMode);
 	applyForce(-force, forceMode);
-}
-
-void Rigidbody::resolveCollision(Rigidbody * actor2)
-{
-	glm::vec2 normal = glm::normalize(actor2->getPosition() - m_position);
-	glm::vec2 relativeVelocity = actor2->getVelocity() - m_velocity;
-
-	float elasticity = 1;
-	float j = glm::dot(-(1 + elasticity) * (relativeVelocity), normal) /
-		glm::dot(normal, normal * ((1 / m_mass) + (1 / actor2->getMass())));
-
-	glm::vec2 force = normal * j;
-
-	applyForceToActor(actor2, force);
 }
 
 void Rigidbody::setVelocity(glm::vec2 a_vel)
