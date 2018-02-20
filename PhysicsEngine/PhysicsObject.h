@@ -21,10 +21,8 @@ public:
 	virtual void makeGizmo() const = 0;
 	virtual void resetPosition() {};
 
-	bool isStatic() { return m_isStatic; };
 	int getShapeID() { return m_shapeID; };
 
 protected: 
 	 ShapeType m_shapeID;
-	 bool m_isStatic;
 };

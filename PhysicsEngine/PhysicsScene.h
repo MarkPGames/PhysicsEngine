@@ -39,6 +39,7 @@ public:
 
 	void checkForCollisions();
 	void resolveCollision(PhysicsObject * object1, PhysicsObject* object2 = nullptr);
+	void seperateCollision(PhysicsObject * object1, PhysicsObject* object2 = nullptr);
 
 	static CollisionData plane2Plane(PhysicsObject* object1, PhysicsObject* object2);
 	static CollisionData plane2Box(PhysicsObject* object1, PhysicsObject* object2);

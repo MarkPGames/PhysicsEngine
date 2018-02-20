@@ -24,6 +24,7 @@ public:
 	virtual void debug();
 	void applyForce(glm::vec2 force, ForceMode forceMode);
 	void applyForceToActor(Rigidbody* actor2, glm::vec2 force, ForceMode forceMode);
+	void setPosition(glm::vec2 a_position) { m_position = a_position; }
 
 	glm::vec2 getPosition() { return m_position; }
 	float getRotation() { return m_rotation; }
