@@ -55,8 +55,8 @@ typedef CollisionData(*fn)(PhysicsObject*, PhysicsObject*);
 static fn collisionFunctionArray[] =
 {
 	//              Plane							 Sphere							 Box
-	/* Plane */	PhysicsScene::plane2Plane,	PhysicsScene::sphere2Plane,		PhysicsScene::plane2Box,
-	/* Sphere */PhysicsScene::sphere2Plane, PhysicsScene::sphere2Sphere,	PhysicsScene::sphere2Box,
+	/* Plane */	PhysicsScene::plane2Plane,	PhysicsScene::sphere2Plane,		PhysicsScene::box2Plane,
+	/* Sphere */PhysicsScene::plane2Sphere, PhysicsScene::sphere2Sphere,	PhysicsScene::box2Sphere,
 	/* Box */	PhysicsScene::plane2Box,	PhysicsScene::sphere2Box,		PhysicsScene::box2Box,
 };
 
@@ -103,6 +103,12 @@ CollisionData PhysicsScene::plane2Box(PhysicsObject * object1, PhysicsObject * o
 	Plane *plane = dynamic_cast<Plane*>(object2);
 	Box *box = dynamic_cast<Box*>(object1);
 
+	if (plane == nullptr && box == nullptr)
+	{
+		return CollisionData(false);
+	}
+
+
 	glm::vec2 collisionNormal = plane->getNormal();
 
 	glm::vec2 boxToPlaneBtmLeft = box->min();
@@ -144,28 +150,7 @@ CollisionData PhysicsScene::plane2Box(PhysicsObject * object1, PhysicsObject * o
 
 CollisionData PhysicsScene::sphere2Plane(PhysicsObject * object1, PhysicsObject * object2)
 {
-	Sphere *sphere = dynamic_cast<Sphere*>(object1);
-	Plane *plane = dynamic_cast<Plane*>(object2);
-
-	//if we are successful then test for collision
-	if (sphere != nullptr && plane != nullptr)
-	{
-		glm::vec2 collisionNormal = plane->getNormal();
-		float sphereToPlane = glm::dot(sphere->getPosition(), plane->getNormal()) - plane->getDistance();
-
-		//// if we are behind plane then we flip the normal
-		//if (sphereToPlane < 0) {
-		//	collisionNormal *= -1;
-		//	sphereToPlane *= -1;
-		//}
-
-		float intersection = sphere->getRadius() - sphereToPlane;
-		if (intersection > 0) 
-		{
-			return CollisionData(intersection, collisionNormal, true);
-		} 
-	}
-	return CollisionData(false);
+	return plane2Sphere(object2, object1);
 }
 
 CollisionData PhysicsScene::sphere2Sphere(PhysicsObject * object1, PhysicsObject * object2)
@@ -252,14 +237,19 @@ CollisionData PhysicsScene::sphere2Box(PhysicsObject * object1, PhysicsObject * 
 	{
 		float overlap = glm::length(vecBetweenClamp) - sphere->getRadius();
 		glm::vec2 normal = glm::normalize(vecBetweenClamp);
+
 		return CollisionData(overlap, normal, true);
 	}
+
+	return CollisionData(false);
 }
 
 CollisionData PhysicsScene::box2Box(PhysicsObject * object1, PhysicsObject * object2)
 {
 	Box *box1 = dynamic_cast<Box*>(object1);
 	Box *box2 = dynamic_cast<Box*>(object2);
+	
+	float offsetFaceDis = 0.0f;
 
 	if (box1 != nullptr && box2 != nullptr) 
 	{
@@ -268,10 +258,79 @@ CollisionData PhysicsScene::box2Box(PhysicsObject * object1, PhysicsObject * obj
 			&& box1->min().y < box2->max().y
 			&& box1->max().y > box2->min().y)
 		{
-			return CollisionData(true);
+			glm::vec2 xOverlap1 = { box1->max().x - box2->min().x, 0.0f };
+			glm::vec2 xOverlap2 = { box1->min().x - box2->max().x, 0.0f };
+
+			glm::vec2 yOverlap1 = { 0.0f , box1->max().y - box2->min().y };
+			glm::vec2 yOverlap2 = { 0.0f ,box1->min().y - box2->max().y };
+
+
+			float lowestDist = abs(xOverlap1.x);
+			glm::vec2 lowestVec = xOverlap1;
+
+
+
+			if (abs(xOverlap2.x) < lowestDist)
+			{
+				lowestDist = abs(xOverlap2.x);
+				lowestVec = xOverlap2;
+			}
+
+			if (abs(yOverlap1.y) < lowestDist)
+			{
+				lowestDist = abs(yOverlap1.y);
+				lowestVec = yOverlap1;
+			}
+
+			if (abs(yOverlap2.y) < lowestDist)
+			{
+				lowestDist = abs(yOverlap2.y);
+				lowestVec = yOverlap2;
+			}
+
+			return CollisionData(lowestDist, glm::normalize(lowestVec), true);
+
 		}
 	}
 	return false;
+}
+
+CollisionData PhysicsScene::box2Plane(PhysicsObject * object1, PhysicsObject * object2)
+{
+	return plane2Box(object2, object1);
+}
+
+CollisionData PhysicsScene::box2Sphere(PhysicsObject * object1, PhysicsObject * object2)
+{
+	CollisionData collData = sphere2Box(object2, object1);
+	collData.normal *= -1.0f;
+	return collData;
+}
+
+CollisionData PhysicsScene::plane2Sphere(PhysicsObject * object1, PhysicsObject * object2)
+{
+	Sphere *sphere = dynamic_cast<Sphere*>(object1);
+	Plane *plane = dynamic_cast<Plane*>(object2);
+
+	//if we are successful then test for collision
+	if (sphere != nullptr && plane != nullptr)
+	{
+		glm::vec2 collisionNormal = plane->getNormal();
+		float sphereToPlane = glm::dot(sphere->getPosition(), plane->getNormal()) - plane->getDistance();
+
+		//// if we are behind plane then we flip the normal
+		//if (sphereToPlane < 0) {
+		//	collisionNormal *= -1;
+		//	sphereToPlane *= -1;
+		//}
+
+		float intersection = sphere->getRadius() - sphereToPlane;
+		if (intersection > 0)
+		{
+			return CollisionData(intersection, collisionNormal, true);
+		}
+	}
+	return CollisionData(false);
 }
 
 void PhysicsScene::resolveCollision(PhysicsObject * object1, PhysicsObject* object2)
@@ -339,6 +398,8 @@ void PhysicsScene::seperateCollision(PhysicsObject * object1, PhysicsObject * ob
 	float ratio2 = 0.0f;
 
 	float totalMass = 0.0f;
+
+	//assert(collisionData.overlap > 0);
 
 	if (rb1 == nullptr)
 	{

@@ -9,6 +9,8 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <cmath>
+#include <iostream>
+#include  <cstdlib>
 
 #define M_PI  3.14159265358979323846
 
@@ -41,47 +43,26 @@ bool PhysicsEngineApp::startup() {
 	float inclination = (float)M_PI / 4.0f;
 	float inclinationInRadians = 0.78539816339;
 
-	//Sphere* m_sphere1;
-	//Sphere* m_sphere2;
-	//Sphere* m_sphere3;
-	//Sphere* m_sphere4;
-	Sphere* m_cueBall;
-	Sphere* m_ball;
+
 	Plane* m_plane1;
 	Plane* m_plane2;
 	Plane* m_plane3;
 	Plane* m_plane4;
-	Box* m_box1;
-	Box* m_box2;
-	//m_sphere1 = new Sphere({ -60, 10 }, { 0,9.8 }, 10, 10, { 1,0,0,1 });
-	//m_sphere2 = new Sphere({ 0, 10 }, { 0,-9.8 }, 10, 3, { 1,1,0,1 });
-	//m_sphere3 = new Sphere({ -60, 30 }, { 0,-9.8 }, 10, 3, { 1,1,0,1 });
-	//m_sphere4 = new Sphere({ 0, -5 }, { -20,0 }, 10, 3, { 1,1,0,1 });
-	m_plane1 = new Plane({0,-1 }, -30, {1,0.5,0,1});
-	m_plane2 = new Plane({ 0,1 }, -30, { 1,0.5,0,1 });
-	m_plane3 = new Plane({ -1,0 }, -30, { 1,0.5,0,1 });
-	m_plane4 = new Plane({ 1,0 }, -30, { 1,0.5,0,1 });
-	m_box1 = new Box({ 1, -25 }, { 0, 0.0f }, 10, { 3,3 }, { 0,1,0,1 });
-	m_box2 = new Box({ -1, 0 }, { 0,0 }, 10, { 3,3 }, { 1,1,0,1 });
-	//m_box2 = new Box({ -30, -10 }, { 0,0 }, 1, { 6,6 }, { 1,1,1,1 });
-	m_cueBall = new Sphere({ -1, 20 }, { 0, 0.0f }, 10, 3, { 1,1,1,1 });
-	m_ball = new Sphere({ 1, -10 }, { 0, 0.0f }, 10, 3, { 1,0,0,1 });
-	//
-	//
-	//m_physicsScene->addActor(m_sphere1);
-	//m_physicsScene->addActor(m_sphere2);
-	//m_physicsScene->addActor(m_sphere3);
-	//m_physicsScene->addActor(m_sphere4);
-	
-	m_physicsScene->addActor(m_box1); 
-	m_physicsScene->addActor(m_box2);
+	Plane* m_plane5;
 
-	m_physicsScene->addActor(m_ball);
-	m_physicsScene->addActor(m_cueBall);
+	m_plane1 = new Plane({0,-1 }, -50, {1,0.5,0,1});
+	m_plane2 = new Plane({ 0,1 }, -50, { 1,0.5,0,1 });
+	m_plane3 = new Plane({ -1,0 }, -90, { 1,0.5,0,1 });
+	m_plane4 = new Plane({ 1,0 }, -90, { 1,0.5,0,1 });
+	m_plane5 = new Plane({ 0.5, 0.5 }, 0, { 1,0.5,0,1 });
+
+	
+
 	m_physicsScene->addActor(m_plane1);
 	m_physicsScene->addActor(m_plane2);
 	m_physicsScene->addActor(m_plane3);
 	m_physicsScene->addActor(m_plane4);
+	m_physicsScene->addActor(m_plane5);
 
 	//m_physicsScene->addActor(new Sphere(startPos, glm::vec2( (cos(inclinationInRadians) , sin(inclinationInRadians)) * speed ), 1, radius, glm::vec4(1, 0, 0, 1)));
 	//setupContinousDemo(glm::vec2(-40, 0), 45.0f, 20.0f, -10.0f);
@@ -105,6 +86,25 @@ void PhysicsEngineApp::update(float deltaTime) {
 
 	m_physicsScene->update(deltaTime); 
 	m_physicsScene->updateGizmos();
+
+
+	glm::vec2 mousePos = { input->getMouseX(), input->getMouseY() };
+
+	float aspectRatio = (float)getWindowWidth() / getWindowHeight();
+
+	glm::vec2 spawnPos = { (input->getMouseX() - (float)getWindowWidth() * 0.5f) / (((float)getWindowWidth()) / (100 * aspectRatio)) , (input->getMouseY() - (float)getWindowHeight() * 0.5f) / (((float)getWindowHeight()) / 100) };
+
+
+
+	if (input->isMouseButtonDown(0))
+	{
+		m_physicsScene->addActor(new Sphere(spawnPos, { 0, 0.0f },10, 2.0f, { (float)rand()  / ((float)RAND_MAX + 1) ,(float)rand() / ((float)RAND_MAX + 1),(float)rand() / ((float)RAND_MAX + 1),1 }));
+	}
+	if (input->isMouseButtonDown(1))
+	{
+		m_physicsScene->addActor(new Box(spawnPos, { 0, 0.0f }, 10, {2,2}, { (float)rand() / ((float)RAND_MAX + 1) ,(float)rand() / ((float)RAND_MAX + 1),(float)rand() / ((float)RAND_MAX + 1) ,1 }));
+	}
+
 
 	// exit the application
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))

@@ -50,9 +50,9 @@ public:
 
 	static CollisionData box2Box(PhysicsObject* object1, PhysicsObject* object2);
 
-	//static bool box2Plane(PhysicsObject* object1, PhysicsObject* object2);
-	//static bool box2Sphere(PhysicsObject* object1, PhysicsObject* object2);
-	//static bool plane2Sphere(PhysicsObject* object1, PhysicsObject* object2);
+	static CollisionData box2Plane(PhysicsObject* object1, PhysicsObject* object2);
+	static CollisionData box2Sphere(PhysicsObject* object1, PhysicsObject* object2);
+	static CollisionData plane2Sphere(PhysicsObject* object1, PhysicsObject* object2);
 
 
 protected:
