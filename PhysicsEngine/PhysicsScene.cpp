@@ -233,6 +233,11 @@ CollisionData PhysicsScene::sphere2Box(PhysicsObject * object1, PhysicsObject * 
 
 	glm::vec2 vecBetweenClamp = offset - sphere->getPosition();
 
+	if (vecBetweenClamp.x == 0.0f && vecBetweenClamp.y == 0.0f)
+	{
+		return CollisionData(false);
+	}
+
 	if (glm::length(vecBetweenClamp) < sphere->getRadius())
 	{
 		float overlap = glm::length(vecBetweenClamp) - sphere->getRadius();
@@ -338,7 +343,7 @@ void PhysicsScene::resolveCollision(PhysicsObject * object1, PhysicsObject* obje
 	Rigidbody* rb1 = dynamic_cast<Rigidbody*>(object1);
 	Rigidbody* rb2  = dynamic_cast<Rigidbody*>(object2);
 
-	glm::vec2 normal;
+	glm::vec2 normal = collisionData.normal;;
 	glm::vec2 relativeVelocity;
 	float elasticity = 1.0f;
 	float j;
@@ -346,9 +351,8 @@ void PhysicsScene::resolveCollision(PhysicsObject * object1, PhysicsObject* obje
 	if (rb1 == nullptr)
 	{
 		rb2 = (Rigidbody*)object2;
-		normal = collisionData.normal;
 
-		glm::vec2 relativeVelocity = rb2->getVelocity();
+		relativeVelocity = rb2->getVelocity();
 
 		float invMass = 1.0f / rb2->getMass();
 		float top = (-(1 + elasticity) * glm::dot((relativeVelocity), normal));
@@ -362,8 +366,6 @@ void PhysicsScene::resolveCollision(PhysicsObject * object1, PhysicsObject* obje
 	{
 		rb1 = (Rigidbody*)object1;
 
-
-		normal = collisionData.normal;
 		glm::vec2 relativeVelocity = rb1->getVelocity();
 
 		float invMass = 1.0f / rb1->getMass();
@@ -376,6 +378,10 @@ void PhysicsScene::resolveCollision(PhysicsObject * object1, PhysicsObject* obje
 	}
 	else
 	{
+		if (normal.x  != normal.x || normal.y != normal.y)
+		{
+			return;
+		}
 		normal = glm::normalize(rb2->getPosition() - rb1->getPosition());
 		relativeVelocity = rb2->getVelocity() - rb1->getVelocity();
 
@@ -398,8 +404,6 @@ void PhysicsScene::seperateCollision(PhysicsObject * object1, PhysicsObject * ob
 	float ratio2 = 0.0f;
 
 	float totalMass = 0.0f;
-
-	//assert(collisionData.overlap > 0);
 
 	if (rb1 == nullptr)
 	{
