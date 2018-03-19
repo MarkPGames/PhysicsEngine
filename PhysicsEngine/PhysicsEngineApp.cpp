@@ -45,7 +45,6 @@ bool PhysicsEngineApp::startup() {
 	float inclination = (float)M_PI / 4.0f;
 	float inclinationInRadians = 0.78539816339;
 
-
 	Plane* m_plane1;
 	Plane* m_plane2;
 	Plane* m_plane3;
@@ -57,8 +56,6 @@ bool PhysicsEngineApp::startup() {
 	m_plane3 = new Plane({ -1,0 }, -90, { 1,0.5,0,1 });
 	m_plane4 = new Plane({ 1,0 }, -90, { 1,0.5,0,1 });
 	m_plane5 = new Plane({ 0.5, 0.5 }, -50, { 1,0.5,0,1 });
-
-
 
 	m_physicsScene->addActor(m_plane1);
 	m_physicsScene->addActor(m_plane2);
@@ -76,10 +73,14 @@ void PhysicsEngineApp::shutdown() {
 
 	delete m_font;
 	delete m_2dRenderer;
-
 }
 
 void PhysicsEngineApp::update(float deltaTime) {
+
+	if (deltaTime > 0.1f)
+	{
+		deltaTime = 0.1f;
+	}
 
 	aie::Gizmos::clear();
 
@@ -101,11 +102,8 @@ void PhysicsEngineApp::update(float deltaTime) {
 
 
 	glm::vec2 mousePos = { input->getMouseX(), input->getMouseY() };
-
 	float aspectRatio = (float)getWindowWidth() / getWindowHeight();
-
 	glm::vec2 spawnPos = { (input->getMouseX() - (float)getWindowWidth() * 0.5f) / (((float)getWindowWidth()) / (100 * aspectRatio)) , (input->getMouseY() - (float)getWindowHeight() * 0.5f) / (((float)getWindowHeight()) / 100) };
-
 
 	if (input->isMouseButtonDown(0))
 	{
@@ -121,9 +119,6 @@ void PhysicsEngineApp::update(float deltaTime) {
 			m_physicsScene->addActor(new Box(spawnPos, { 0, 0.0f }, 10, { radius,radius }, { (float)rand() / ((float)RAND_MAX + 1) ,(float)rand() / ((float)RAND_MAX + 1),(float)rand() / ((float)RAND_MAX + 1) ,1 }));
 		}
 	}
-
-
-
 
 	if (wtdf != input->getMouseScroll())
 	{
@@ -171,7 +166,6 @@ void PhysicsEngineApp::draw() {
 	// done drawing sprites
 	m_2dRenderer->end();
 }
-
 
 
 void PhysicsEngineApp::setupContinousDemo(glm::vec2 startPos, float inclination, float speed, float gravity)
